@@ -1,36 +1,33 @@
-// 🧭 Caminho corrigido para subir um nível e entrar em config
-const { supabase } = require('../config/supabase');
+const jwt = require('jsonwebtoken');
+
+// Usa a mesma chave secreta definida no seu controlador de alunos
+const JWT_SECRET = process.env.JWT_SECRET || 'seu-secret-key-muito-seguro';
 
 const protegerRota = async (req, res, next) => {
     try {
-        // 1. Pega o token enviado pelo front-end no cabeçalho (Headers) da requisição
+        // 1. Captura o cabeçalho de autorização
         const authHeader = req.headers.authorization;
 
-        // Verifica se o cabeçalho existe e se começa com "Bearer " (padrão de mercado)
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ 
-                error: 'Acesso negado. Token de autenticação não fornecido ou inválido.' \r
+                error: 'Acesso negado. Token de autenticação não fornecido ou inválido.' 
             });
         }
 
-        // Extrai apenas o código do token (remove a palavra "Bearer")
+        // 2. Extrai o token string
         const token = authHeader.split(' ')[1];
 
-        // 2. Pede ao Supabase para verificar se esse token JWT é válido e real
-        const { data: { user }, error } = await supabase.auth.getUser(token);
+        // 3. Descriptografa e valida o token JWT gerado pelo alunoController
+        const decoded = jwt.verify(token, JWT_SECRET);
 
-        // Se o Supabase disser que o token expirou ou é falso, barra o usuário
-        if (error || !user) {
-            return res.status(401).json({ error: 'Sessão inválida ou expirada. Faça login novamente.' });
-        }
+        // 4. Injeta o ID do aluno verificado na requisição (repare que o seu controller salvou como id_aluno)
+        req.usuarioLogadoId = decoded.id_aluno;
 
-        // 3. Injeta o ID verificado dentro da requisição (req) para o controller usar
-        req.usuarioLogadoId = user.id;
-
-        // Libera para o Express continuar
+        // Autoriza o Express a prosseguir para as rotas/controllers
         next();
     } catch (err) {
-        return res.status(401).json({ error: 'Falha na autenticação dos minutos.' });
+        console.error('💥 Erro de validação no Middleware Auth:', err.message);
+        return res.status(401).json({ error: 'Sessão inválida ou expirada. Faça login novamente.' });
     }
 };
 
