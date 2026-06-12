@@ -1,4 +1,5 @@
-const supabase = require('./src/config/supabase');
+// 🧭 Caminho corrigido para subir um nível e entrar em config
+const { supabase } = require('../config/supabase');
 
 const protegerRota = async (req, res, next) => {
     try {
@@ -8,7 +9,7 @@ const protegerRota = async (req, res, next) => {
         // Verifica se o cabeçalho existe e se começa com "Bearer " (padrão de mercado)
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ 
-                error: 'Acesso negado. Token de autenticação não fornecido ou inválido.' 
+                error: 'Acesso negado. Token de autenticação não fornecido ou inválido.' \r
             });
         }
 
@@ -23,14 +24,13 @@ const protegerRota = async (req, res, next) => {
             return res.status(401).json({ error: 'Sessão inválida ou expirada. Faça login novamente.' });
         }
 
-        // 3. O PULO DO GATO: Se o token for válido, nós injetamos o ID verificado dentro da requisição (req)
+        // 3. Injeta o ID verificado dentro da requisição (req) para o controller usar
         req.usuarioLogadoId = user.id;
 
-        // Libera para o Express continuar e ir para o Controller/Banco de dados
+        // Libera para o Express continuar
         next();
-
     } catch (err) {
-        return res.status(500).json({ error: 'Erro interno na validação da autenticação.' });
+        return res.status(401).json({ error: 'Falha na autenticação dos minutos.' });
     }
 };
 

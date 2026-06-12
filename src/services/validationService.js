@@ -1,14 +1,15 @@
-const { supabase } = require('./src/config/supabase');
+// 🧭 Caminho corrigido para subir um nível (../) e achar a pasta config
+const { supabase } = require('../config/supabase');
 
 class ValidationService {
     async validarLimiteDiario(id_aluno, minutos, dataRegistro) {
         try {
-            // 1. Buscar configuração do limite com tratamento de erro
+            // 1. Buscar configuração do limite na tabela [configuracoes]
             const { data: config, error: errorConfig } = await supabase
                 .from('configuracoes')
                 .select('valor')
                 .eq('chave', 'limite_minutos_diario')
-                .maybeSingle(); // maybeSingle não quebra o código se não achar nada
+                .maybeSingle();
 
             if (errorConfig) {
                 throw new Error(`Erro ao buscar configurações: ${errorConfig.message}`);
@@ -16,13 +17,13 @@ class ValidationService {
             
             const limiteDiario = parseInt(config?.valor || 16);
             
-            // 2. Buscar registro do dia
+            // 2. Buscar quanto o aluno já leu hoje na tabela [logs_leitura] (ajustado para o nome real da tabela)
             const { data: registroExistente, error: errorRegistro } = await supabase
-                .from('registros_leitura')
+                .from('logs_leitura') 
                 .select('minutos_lidos')
                 .eq('id_aluno', id_aluno)
                 .eq('data_registro', dataRegistro)
-                .maybeSingle(); // Trocado por maybeSingle para evitar o erro PGRST116 quando o aluno não leu nada ainda
+                .maybeSingle();
 
             if (errorRegistro) {
                 throw new Error(`Erro ao buscar registros de leitura: ${errorRegistro.message}`);
@@ -31,12 +32,12 @@ class ValidationService {
             const minutosJaRegistrados = registroExistente?.minutos_lidos || 0;
             const totalMinutos = minutosJaRegistrados + minutos;
             
-            // 3. Validação da meta diária
+            // 3. Validação da meta diária configurada
             if (totalMinutos > limiteDiario) {
-                const minutosRestantes = limiteDiario - minutosJaRegistrados;
+                const minutosRestantes = limiteDiario - minutesJaRegistrados;
                 return {
                     valido: false,
-                    mensagem: `Limite diário de ${limiteDiario} minutos excedido! Você já registrou ${minutosJaRegistrados} minutos hoje. Só pode adicionar mais ${minutosRestantes} minutos.`,
+                    mensagem: `Limite diário de ${limiteDiario} minutos excedido! Já registou ${minutosJaRegistrados} minutos hoje. Só pode adicionar mais ${minutosRestantes} minutos.`,
                     minutosRestantes,
                     limite: limiteDiario,
                     jaRegistrados: minutosJaRegistrados
@@ -46,14 +47,13 @@ class ValidationService {
             return {
                 valido: true,
                 mensagem: 'Registro válido',
-                totalRegistrado: totalMinutos
+                totalRegistrado: totalMinutos,
+                limite: limiteDiario,
+                jaRegistrados: minutosJaRegistrados
             };
 
         } catch (error) {
-            // O catch intercepta qualquer falha catastrófica ou os erros disparados acima
             console.error('Erro crítico no ValidationService:', error.message);
-            
-            // Lança o erro para a frente para ser capturado pelo seu Controller
             throw new Error(`Falha interna na validação: ${error.message}`);
         }
     }

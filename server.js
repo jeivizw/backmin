@@ -14,7 +14,7 @@ app.use(express.json());
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use('/api/', limiter);
 
-// 🏠 ROTA RAIZ (Para sumir de vez com o "Cannot GET /")
+// 🏠 ROTA RAIZ
 app.get('/', (req, res) => {
     res.json({ 
         message: "Servidor Backend do SESI ativo com sucesso!", 
@@ -22,20 +22,12 @@ app.get('/', (req, res) => {
     });
 });
 
-// 🧪 ROTA DE TESTE DA API
-app.get('/api/teste', (req, res) => {
-    res.json({ 
-        status: "API funcional", 
-        projeto: "Campanha de Leitura SESI",
-        timestamp: new Date()
-    });
-});
-
-// 🔌 CONEXÃO COM AS ROTAS DO SESI
-// Nota: Certifique-se de que a pasta 'src' realmente existe no seu projeto da Vercel
-
+// 🔌 CONEXÃO COM AS ROTAS DO SESI (Aqui buscamos de dentro do ./src/ pois o server.js está fora)
 const alunoRoutes = require('./src/routes/alunoRoutes');
+const leituraRoutes = require('./src/routes/leituraRoutes');
+
 app.use('/api', alunoRoutes);
+app.use('/api/leitura', leituraRoutes); // Adicionado para ativar os endpoints de gráficos, metas e ranking!
 
 // Tratamento de erros centralizado
 app.use((err, req, res, next) => {
@@ -44,12 +36,8 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3001;
-
-// Executa o listen apenas se não estiver na Vercel (produção serverless)
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`🚀 Back-end Campanha de Leitura SESI ativo na porta ${PORT}`);
-    });
-}
+app.listen(PORT, () => {
+    console.log(`🚀 Back-end Campanha de Leitura SESI ativo na porta ${PORT}`);
+});
 
 module.exports = app;

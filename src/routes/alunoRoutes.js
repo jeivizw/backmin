@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const alunoController = require('./src/controllers/alunoController');
+// 🧭 Caminho corrigido para sair de routes e achar controllers
+const alunoController = require('../controllers/alunoController');
 
 // Rotas de Autenticação
 router.post('/login/rm', alunoController.loginPorRM);
