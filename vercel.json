@@ -8,8 +8,13 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "server.js"
+    },
+    {
+      "src": "/(.*)",
+      "status": 404,
+      "statusText": "Rota principal nao encontrada. Use os endpoints da API (/api/...)"
     }
   ]
 }
