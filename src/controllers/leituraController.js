@@ -1,5 +1,5 @@
 const { supabase } = require('../config/supabase'); // Ajuste o caminho se necessário
-const { verificarTokenInterno } = require('../helpers/auth'); // Ou como vocês extraem o user logado
+const { verificarTokenInterno } = require('./src/middleware/auth'); // Ou como vocês extraem o user logado
 
 class LeituraController {
     

@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const leituraController = require('../controllers/leituraController');
-const { protegerRota } = require('../middlewares/auth');
-const { validarMinutosDodia } = require('../middlewares/validation');
+const leituraController = require('./src/controllers/leituraController');
+const { protegerRota } = require('./src/middlewares/auth');
+const { validarMinutosDodia } = require('./src/middlewares/validation');
 
 // 1. Registro de Leitura Diária (Protegido e Validado)
 router.post(

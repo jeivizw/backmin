@@ -33,6 +33,7 @@ app.get('/api/teste', (req, res) => {
 
 // 🔌 CONEXÃO COM AS ROTAS DO SESI
 // Nota: Certifique-se de que a pasta 'src' realmente existe no seu projeto da Vercel
+
 const alunoRoutes = require('./src/routes/alunoRoutes');
 app.use('/api', alunoRoutes);
 

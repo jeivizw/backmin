@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const alunoController = require('../controllers/alunoController');
+const alunoController = require('./src/controllers/alunoController');
 
 // Rotas de Autenticação
 router.post('/login/rm', alunoController.loginPorRM);
