@@ -25,8 +25,12 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`🚀 Back-end Campanha de Leitura SESI ativo na porta ${PORT}`);
-});
+
+// Só escuta a porta se NÃO estiver rodando dentro do ambiente da Vercel
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Back-end Campanha de Leitura SESI ativo na porta ${PORT}`);
+    });
+}
 
 module.exports = app;
